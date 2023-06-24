@@ -1,2 +1,2 @@
 # arduino
-My Arduino Projects
+My arduino projects, thanks ChatGPT for the help 
