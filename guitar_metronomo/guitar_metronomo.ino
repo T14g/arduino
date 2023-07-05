@@ -13,6 +13,10 @@ const int prevPin = 7;
 const int playPin = 6;
 const int nextPin = 5;
 
+int reading1 = 0;
+int reading2 = 0;
+int reading3 = 0;
+
 int prevState = 0;
 int prevPrevState = 0;
 int playState = 0;
@@ -21,6 +25,12 @@ int nextState = 0;
 int prevNextState = 0;
 
 int currentMode = 0;
+
+unsigned long debounceDelay = 50;    // Debounce delay in milliseconds
+
+unsigned long lastDebounceTime1 = 0;
+unsigned long lastDebounceTime2 = 0;
+unsigned long lastDebounceTime3 = 0;
 
 // Tempo variables
 int tempo = 120;
@@ -70,7 +80,7 @@ void loop() {
 
   // Calculate the beat interval
    // Only update the LCD if the tempo value has changed
-    if (tempo != previousTempo) {
+    if (tempo != previousTempo && currentMode == 0) {
       // Calculate the beat interval
       calculateBeatInterval();
 
@@ -129,22 +139,73 @@ void loop() {
     previousMillis = currentMillis;
   }
 
-  prevState = digitalRead(prevPin);
-  playState = digitalRead(playPin);
-  nextState = digitalRead(nextPin);
-
-  if(prevState == HIGH ) {
-    Serial.println("Prev");
+  reading1 = digitalRead(prevPin);
+  reading2 = digitalRead(playPin);
+  reading3 = digitalRead(nextPin);
+ 
+  if(reading1 != prevPrevState) {
+    lastDebounceTime1 = millis();   
   }
 
-  if(playState ) {
-    Serial.println("Play");
+  if(reading2 != prevPlayState) {
+    lastDebounceTime2 = millis();   
   }
 
-  if(nextState == HIGH) {
-    Serial.println("Next");
+  if(reading3 != prevNextState) {
+    lastDebounceTime3 = millis();   
   }
 
+    // Check if the button state has been stable for the debounce delay
+  if ((millis() - lastDebounceTime1) > debounceDelay) {
+    // If the button state is HIGH and different from the previous state, execute the command
+    if (reading1 == HIGH && reading1 != prevState) {
+      // Your command here
+      Serial.println("Prev pressed!");
+    }
+
+    prevState = reading1;   // Update the button state
+  }
+
+  prevPrevState = reading1;
+
+  if ((millis() - lastDebounceTime2) > debounceDelay) {
+    // If the button state is HIGH and different from the previous state, execute the command
+    if (reading2 == HIGH && reading2 != playState) {
+      // Your command here
+      Serial.println("Play pressed!");
+    }
+
+    playState = reading2;   // Update the button state
+  }
+
+  prevPlayState = reading2;
+
+  if ((millis() - lastDebounceTime3) > debounceDelay) {
+    // If the button state is HIGH and different from the previous state, execute the command
+    if (reading3 == HIGH && reading3 != nextState) {
+      // Your command here
+      Serial.println("Next pressed!");
+    }
+
+    nextState = reading3;   // Update the button state
+  }
+
+  prevNextState = reading3;
+
+//   if(playState ) {
+//     Serial.println("Play");
+//   }
+
+//   if(nextState == HIGH) {
+//     Serial.println("Next");
+//       if(currentMode < 5) {
+//       currentMode = currentMode + 1;
+//     }
+
+//     Serial.println(currentMode);
+//   }
+
+//  prevPrevState = prevState;
 
 }
 
