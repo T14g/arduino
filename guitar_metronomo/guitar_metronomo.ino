@@ -2,6 +2,9 @@
 #include <hd44780.h>
 #include <hd44780ioClass/hd44780_I2Cexp.h>
 
+const int START_OPTION = 0;
+const int END_OPTION = 2;
+
 // Pin configuration for LEDs
 const int ledPin = 13;
 const int ledPin1 = 10;
@@ -25,6 +28,7 @@ int nextState = 0;
 int prevNextState = 0;
 
 int currentMode = 0;
+int switchingMode = 1;
 
 unsigned long debounceDelay = 50;    // Debounce delay in milliseconds
 
@@ -72,6 +76,106 @@ void setup() {
 }
 
 void loop() {
+  buttons();
+
+  if(switchingMode == 1 || currentMode == 0) {
+      switch(currentMode) {
+      case 0 :
+        metronome();
+        switchingMode = 0;
+        break;
+      case 1: 
+        scales();
+        switchingMode = 0;
+        break;
+      case 2:
+        chords();
+        switchingMode = 0;
+        break;
+      default:
+        switchingMode = 0;
+        break;
+    }
+  }
+
+}
+
+void buttons() {
+    reading1 = digitalRead(prevPin);
+    reading2 = digitalRead(playPin);
+    reading3 = digitalRead(nextPin);
+  
+    if(reading1 != prevPrevState) {
+      lastDebounceTime1 = millis();   
+    }
+
+    if(reading2 != prevPlayState) {
+      lastDebounceTime2 = millis();   
+    }
+
+    if(reading3 != prevNextState) {
+      lastDebounceTime3 = millis();   
+    }
+
+    //Prev
+    if ((millis() - lastDebounceTime1) > debounceDelay) {
+      // If the button state is HIGH and different from the previous state, execute the command
+      if (reading1 == HIGH && reading1 != prevState) {
+        // Your command here
+        Serial.println("Prev pressed!");
+          if(currentMode > START_OPTION) {
+          currentMode = currentMode - 1;
+          switchingMode = 1;
+        }
+      }
+
+      prevState = reading1;   // Update the button state
+    }
+
+    prevPrevState = reading1;
+
+    if ((millis() - lastDebounceTime2) > debounceDelay) {
+      // If the button state is HIGH and different from the previous state, execute the command
+      if (reading2 == HIGH && reading2 != playState) {
+        // Your command here
+        Serial.println("Play pressed!");
+      }
+
+      playState = reading2;   // Update the button state
+    }
+
+    prevPlayState = reading2;
+
+    if ((millis() - lastDebounceTime3) > debounceDelay) {
+      // If the button state is HIGH and different from the previous state, execute the command
+      if (reading3 == HIGH && reading3 != nextState) {
+        // Your command here
+        Serial.println("Next pressed!");
+        if(currentMode < END_OPTION) {
+          currentMode = currentMode + 1;
+          switchingMode = 1;
+        }
+      }
+
+      nextState = reading3;   // Update the button state
+    }
+
+    prevNextState = reading3;
+}
+
+void scales() {
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Scales Mode: ");
+}
+
+void chords() {
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Chords Mode: ");
+}
+
+void metronome() {
   // Read the potentiometer value
   int potValue = analogRead(potPin);
 
@@ -80,7 +184,7 @@ void loop() {
 
   // Calculate the beat interval
    // Only update the LCD if the tempo value has changed
-    if (tempo != previousTempo && currentMode == 0) {
+    if (tempo != previousTempo) {
       // Calculate the beat interval
       calculateBeatInterval();
 
@@ -123,12 +227,12 @@ void loop() {
     // Increment beat counter
     beatCounter++;
 
-    // // Play the metronome sound
-    // if (beatCounter == 1 || beatCounter == 3) {
-    //   tone(9, 1000, 100); // Play a click sound for the first and third beat
-    // } else {
-    //   tone(9, 800, 100); // Play a softer click sound for the second and fourth beat
-    // }
+    // Play the metronome sound
+    if (beatCounter == 1 || beatCounter == 3) {
+      tone(9, 1000, 100); // Play a click sound for the first and third beat
+    } else {
+      tone(9, 800, 100); // Play a softer click sound for the second and fourth beat
+    }
 
     // Check if a measure is completed
     if (beatCounter > beatsPerMeasure) {
@@ -138,75 +242,6 @@ void loop() {
     // Store current time
     previousMillis = currentMillis;
   }
-
-  reading1 = digitalRead(prevPin);
-  reading2 = digitalRead(playPin);
-  reading3 = digitalRead(nextPin);
- 
-  if(reading1 != prevPrevState) {
-    lastDebounceTime1 = millis();   
-  }
-
-  if(reading2 != prevPlayState) {
-    lastDebounceTime2 = millis();   
-  }
-
-  if(reading3 != prevNextState) {
-    lastDebounceTime3 = millis();   
-  }
-
-    // Check if the button state has been stable for the debounce delay
-  if ((millis() - lastDebounceTime1) > debounceDelay) {
-    // If the button state is HIGH and different from the previous state, execute the command
-    if (reading1 == HIGH && reading1 != prevState) {
-      // Your command here
-      Serial.println("Prev pressed!");
-    }
-
-    prevState = reading1;   // Update the button state
-  }
-
-  prevPrevState = reading1;
-
-  if ((millis() - lastDebounceTime2) > debounceDelay) {
-    // If the button state is HIGH and different from the previous state, execute the command
-    if (reading2 == HIGH && reading2 != playState) {
-      // Your command here
-      Serial.println("Play pressed!");
-    }
-
-    playState = reading2;   // Update the button state
-  }
-
-  prevPlayState = reading2;
-
-  if ((millis() - lastDebounceTime3) > debounceDelay) {
-    // If the button state is HIGH and different from the previous state, execute the command
-    if (reading3 == HIGH && reading3 != nextState) {
-      // Your command here
-      Serial.println("Next pressed!");
-    }
-
-    nextState = reading3;   // Update the button state
-  }
-
-  prevNextState = reading3;
-
-//   if(playState ) {
-//     Serial.println("Play");
-//   }
-
-//   if(nextState == HIGH) {
-//     Serial.println("Next");
-//       if(currentMode < 5) {
-//       currentMode = currentMode + 1;
-//     }
-
-//     Serial.println(currentMode);
-//   }
-
-//  prevPrevState = prevState;
-
 }
 
 void calculateBeatInterval() {
