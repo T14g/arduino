@@ -113,15 +113,18 @@ void sendRequest () {
     Serial.println("Starting ESP01 module...");
 
       // Send an HTTP request to the server
-      String request = "GET /FOLDER/FILE.php HTTP/1.1\r\n";
-      request += "Host: HOST.com\r\n";
+      String payloadData = "param1=value1&param2=value2";  // Example payload data
+      String request = "POST /arduino/teste.php HTTP/1.1\r\n";
+      request += "Host: teste.com\r\n";
       request += "Connection: close\r\n";
       request += "User-Agent: Arduino\r\n";
       request += "Accept: */*\r\n";
       request += "Content-Type: application/x-www-form-urlencoded\r\n";
+      request += "Content-Length: " + String(payloadData.length()) + "\r\n";
       request += "\r\n";
+      request += payloadData;
 
-      sendCommand("AT+CIPSTART=\"TCP\",\"HOST.com\",80\r\n", 5000); // Connect to the server
+      sendCommand("AT+CIPSTART=\"TCP\",\"teste.com\",80\r\n", 5000); // Connect to the server
       sendCommand(("AT+CIPSEND=" + String(request.length()) + "\r\n").c_str(), 2000); // Send request length
       sendCommand(request.c_str(), 5000); // Send the HTTP request
 
