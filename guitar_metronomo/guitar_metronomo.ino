@@ -241,7 +241,22 @@ void buttons() {
     prevNextState = reading3;
 }
 
+void turnLedsOFF() {
+    int ledState = digitalRead(ledPin);
+    int ledState1 = digitalRead(ledPin1);
+    int ledState2 = digitalRead(ledPin2);
+    int ledState3 = digitalRead(ledPin3);
+
+    if(ledState == HIGH || ledState1 == HIGH || ledState2 == HIGH || ledState3 == HIGH) {
+      digitalWrite(ledPin, LOW);    // First LED off
+      digitalWrite(ledPin1, LOW);  // Second LED on
+      digitalWrite(ledPin2, LOW);   // Third LED off
+      digitalWrite(ledPin3, LOW);   // Fourth LED off
+    }
+}
+
 void scales() {
+    turnLedsOFF();
     int potValue = analogRead(potPin);
     // Map the potentiometer value to tempo range
     tempo = map(potValue, 0, 1023, 1, 240);
@@ -261,6 +276,7 @@ void scales() {
 }
 
 void chords() {
+    turnLedsOFF();
     int potValue = analogRead(potPin);
    // Map the potentiometer value to tempo range
     tempo = map(potValue, 0, 1023, 1, 240);
