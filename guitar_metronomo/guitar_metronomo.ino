@@ -85,35 +85,43 @@ void setup() {
 
 void loop() {
   buttons();
-
-  if(switchingMode == 1 || currentMode == 0) {
-      switch(currentMode) {
-      case 0 :
-        metronome();
-        switchingMode = 0;
-        break;
-      case 1: 
-        scales();
-        switchingMode = 0;
-        break;
-      case 2:
-        chords();
-        switchingMode = 0;
-        break;
-      default:
-        switchingMode = 0;
-        break;
-    }
+  switch(currentMode) {
+    case 0 :
+      metronome();
+      switchingMode = 0;
+      break;
+    case 1: 
+      scales();
+      switchingMode = 0;
+      break;
+    case 2:
+      chords();
+      switchingMode = 0;
+      break;
+    default:
+      switchingMode = 0;
+      break;
   }
-
 }
 
+String getModeName() {
+    switch(currentMode) {
+    case 0 :
+      return "Metronome";
+    case 1: 
+      return "Scales";
+    case 2:
+      return "Chords";
+    default:
+      return "Mode not selected";
+  }
+}
 
 void sendRequest () {
     Serial.println("Starting ESP01 module...");
 
       // Send an HTTP request to the server
-      String payloadData = "param1=value1&param2=value2";  // Example payload data
+      String payloadData = "mode=" + getModeName() + "&tempo=" + tempo;  // Example payload data
       String request = "POST /arduino/teste.php HTTP/1.1\r\n";
       request += "Host: teste.com\r\n";
       request += "Connection: close\r\n";
@@ -234,15 +242,42 @@ void buttons() {
 }
 
 void scales() {
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Scales Mode: ");
+    int potValue = analogRead(potPin);
+    // Map the potentiometer value to tempo range
+    tempo = map(potValue, 0, 1023, 1, 240);
+
+    if (tempo != previousTempo) {
+      // Update LCD with tempo information
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("Scales Mode: ");
+      lcd.setCursor(0, 1);
+      lcd.print(tempo);
+      lcd.print(" Mins");
+
+      // Update the previous tempo value
+      previousTempo = tempo;
+    }
 }
 
 void chords() {
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Chords Mode: ");
+    int potValue = analogRead(potPin);
+   // Map the potentiometer value to tempo range
+    tempo = map(potValue, 0, 1023, 1, 240);
+
+    if (tempo != previousTempo) {
+      // Update LCD with tempo information
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("Chords Mode: ");
+      lcd.setCursor(0, 1);
+      lcd.print(tempo);
+      lcd.print(" Mins");
+
+      // Update the previous tempo value
+      previousTempo = tempo;
+    }
+
 }
 
 void metronome() {
