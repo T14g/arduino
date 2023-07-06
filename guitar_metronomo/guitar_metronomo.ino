@@ -1,6 +1,13 @@
 #include <Wire.h>
 #include <hd44780.h>
 #include <hd44780ioClass/hd44780_I2Cexp.h>
+#include <SoftwareSerial.h>
+
+SoftwareSerial espSerial(2, 3); // RX, TX pins for ESP01 module
+
+// Replace with your network credentials
+const char* ssid = "NETWORK";
+const char* password = "NETWORK PASSWORD";
 
 const int START_OPTION = 0;
 const int END_OPTION = 2;
@@ -58,7 +65,8 @@ const int beatsPerMeasure = 4;
 int beatCounter = 0;
 
 void setup() {
-   Serial.begin(115200);
+  Serial.begin(115200); // Serial communication with Arduino IDE
+  espSerial.begin(115200); // Serial communication with ESP01 module
   // Initialize the LCD
   lcd.begin(LCD_COLS, LCD_ROWS);
 
@@ -100,6 +108,60 @@ void loop() {
 
 }
 
+
+void sendRequest () {
+    Serial.println("Starting ESP01 module...");
+
+      // Send an HTTP request to the server
+      String request = "GET /FOLDER/FILE.php HTTP/1.1\r\n";
+      request += "Host: HOST.com\r\n";
+      request += "Connection: close\r\n";
+      request += "User-Agent: Arduino\r\n";
+      request += "Accept: */*\r\n";
+      request += "Content-Type: application/x-www-form-urlencoded\r\n";
+      request += "\r\n";
+
+      sendCommand("AT+CIPSTART=\"TCP\",\"HOST.com\",80\r\n", 5000); // Connect to the server
+      sendCommand(("AT+CIPSEND=" + String(request.length()) + "\r\n").c_str(), 2000); // Send request length
+      sendCommand(request.c_str(), 5000); // Send the HTTP request
+
+      // Wait for the response
+      delay(500);
+      while (espSerial.available()) {
+        String response = espSerial.readStringUntil('\n');
+        Serial.println(response);
+      }
+
+      sendCommand("AT+CIPCLOSE\r\n", 2000); // Close the TCP connection
+
+      delay(5000); // Wait for 5 seconds before sending the next request
+
+}
+
+void sendCommand(const char* command, int timeout) {
+  espSerial.print(command);
+  delay(10);
+
+  long int time = millis();
+  while ((time + timeout) > millis()) {
+    while (espSerial.available()) {
+      char c = espSerial.read();
+      Serial.write(c);
+    }
+  }
+}
+
+void connectToWiFi() {
+  String cmd = "AT+CWJAP=\"";
+  cmd += ssid;
+  cmd += "\",\"";
+  cmd += password;
+  cmd += "\"\r\n";
+  sendCommand(cmd.c_str(), 10000); // Connect to Wi-Fi network
+
+  sendCommand("AT+CIFSR\r\n", 5000); // Get IP address
+}
+
 void buttons() {
     reading1 = digitalRead(prevPin);
     reading2 = digitalRead(playPin);
@@ -139,6 +201,11 @@ void buttons() {
       if (reading2 == HIGH && reading2 != playState) {
         // Your command here
         Serial.println("Play pressed!");
+          // Serial.println("Sending Request");
+          sendCommand("AT\r\n", 2000); // Send AT command to ESP01 module
+          sendCommand("AT+RST\r\n", 5000); // Reset ESP01 module
+          connectToWiFi();
+          sendRequest();
       }
 
       playState = reading2;   // Update the button state
