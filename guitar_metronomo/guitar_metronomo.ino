@@ -2,12 +2,13 @@
 #include <hd44780.h>
 #include <hd44780ioClass/hd44780_I2Cexp.h>
 #include <SoftwareSerial.h>
+#include "personal_data.h"
 
 SoftwareSerial espSerial(2, 3); // RX, TX pins for ESP01 module
 
 // Replace with your network credentials
-const char* ssid = "NETWORK";
-const char* password = "NETWORK PASSWORD";
+const char* ssid = WIFI_SSID;
+const char* password = WIFI_PASSWORD;
 
 const int START_OPTION = 0;
 const int END_OPTION = 2;
@@ -122,8 +123,8 @@ void sendRequest () {
 
       // Send an HTTP request to the server
       String payloadData = "mode=" + getModeName() + "&tempo=" + tempo;  // Example payload data
-      String request = "POST /arduino/teste.php HTTP/1.1\r\n";
-      request += "Host: teste.com\r\n";
+      String request = "POST /arduino/guitar-api.php HTTP/1.1\r\n";
+      request += "Host: " +  String(HOST_URL) + "\r\n";
       request += "Connection: close\r\n";
       request += "User-Agent: Arduino\r\n";
       request += "Accept: */*\r\n";
@@ -132,7 +133,8 @@ void sendRequest () {
       request += "\r\n";
       request += payloadData;
 
-      sendCommand("AT+CIPSTART=\"TCP\",\"teste.com\",80\r\n", 5000); // Connect to the server
+      // Connect to the server
+      sendCommand(("AT+CIPSTART=\"TCP\",\"" + String(HOST_URL) + "\",80\r\n").c_str(), 5000);
       sendCommand(("AT+CIPSEND=" + String(request.length()) + "\r\n").c_str(), 2000); // Send request length
       sendCommand(request.c_str(), 5000); // Send the HTTP request
 
