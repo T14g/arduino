@@ -11,7 +11,7 @@ const char* ssid = WIFI_SSID;
 const char* password = WIFI_PASSWORD;
 
 const int START_OPTION = 0;
-const int END_OPTION = 2;
+const int END_OPTION = 5;
 
 // Pin configuration for LEDs
 const int ledPin = 13;
@@ -65,9 +65,43 @@ hd44780_I2Cexp lcd;
 const int beatsPerMeasure = 4;
 int beatCounter = 0;
 
+const char* guitarModes[] = {
+  "Metronome",
+  "Scales",
+  "Chords",
+  "Tabs",
+  "Improvisation"
+};
+
+void choseGuitarMode(int mode) {
+    turnLedsOFF();
+
+    int potValue = analogRead(potPin);
+    // Map the potentiometer value to tempo range
+    tempo = map(potValue, 0, 1023, 1, 240);
+
+    if (tempo != previousTempo) {
+      // Update LCD with tempo information
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print(guitarModes[currentMode]);
+      lcd.setCursor(0, 1);
+      lcd.print(tempo);
+      if(mode == 0) {
+         lcd.print(" BPM");
+      }else {
+         lcd.print(" Mins");
+      }
+    
+      // Update the previous tempo value
+      previousTempo = tempo;
+    }
+}
+
 void setup() {
   Serial.begin(115200); // Serial communication with Arduino IDE
   espSerial.begin(115200); // Serial communication with ESP01 module
+
   // Initialize the LCD
   lcd.begin(LCD_COLS, LCD_ROWS);
 
@@ -86,36 +120,16 @@ void setup() {
 
 void loop() {
   buttons();
-  switch(currentMode) {
-    case 0 :
-      metronome();
-      switchingMode = 0;
-      break;
-    case 1: 
-      scales();
-      switchingMode = 0;
-      break;
-    case 2:
-      chords();
-      switchingMode = 0;
-      break;
-    default:
-      switchingMode = 0;
-      break;
+
+  if(currentMode == 0) {
+    metronome();
+  }else {
+      choseGuitarMode(currentMode);
   }
 }
 
 String getModeName() {
-    switch(currentMode) {
-    case 0 :
-      return "Metronome";
-    case 1: 
-      return "Scales";
-    case 2:
-      return "Chords";
-    default:
-      return "Mode not selected";
-  }
+    return guitarModes[currentMode];
 }
 
 void sendRequest () {
@@ -255,47 +269,6 @@ void turnLedsOFF() {
       digitalWrite(ledPin2, LOW);   // Third LED off
       digitalWrite(ledPin3, LOW);   // Fourth LED off
     }
-}
-
-void scales() {
-    turnLedsOFF();
-    int potValue = analogRead(potPin);
-    // Map the potentiometer value to tempo range
-    tempo = map(potValue, 0, 1023, 1, 240);
-
-    if (tempo != previousTempo) {
-      // Update LCD with tempo information
-      lcd.clear();
-      lcd.setCursor(0, 0);
-      lcd.print("Scales Mode: ");
-      lcd.setCursor(0, 1);
-      lcd.print(tempo);
-      lcd.print(" Mins");
-
-      // Update the previous tempo value
-      previousTempo = tempo;
-    }
-}
-
-void chords() {
-    turnLedsOFF();
-    int potValue = analogRead(potPin);
-   // Map the potentiometer value to tempo range
-    tempo = map(potValue, 0, 1023, 1, 240);
-
-    if (tempo != previousTempo) {
-      // Update LCD with tempo information
-      lcd.clear();
-      lcd.setCursor(0, 0);
-      lcd.print("Chords Mode: ");
-      lcd.setCursor(0, 1);
-      lcd.print(tempo);
-      lcd.print(" Mins");
-
-      // Update the previous tempo value
-      previousTempo = tempo;
-    }
-
 }
 
 void metronome() {
