@@ -15,7 +15,7 @@ unsigned long debounceDelay = 50; // Adjust this value as needed
 int joystickPinX = A0;
 int joystickThreshold = 512;
 int currentMenuOption = 0;
-int maxMenuOptions = 3;
+int maxMenuOptions = 6;
 
 void setup() {
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // Initialize with the I2C address of your display
@@ -44,6 +44,14 @@ void loop() {
       display.setCursor(0, 0);
       display.println("Button Pressed");
       display.display(); // Update the display
+
+      if(currentMenuOption == 3) {
+          Serial.println("backtrack1");
+      }else if (currentMenuOption == 4){
+        Serial.println("backtrack2");
+      }else if(currentMenuOption == 5) {
+        Serial.println("stopmusic");
+      }
       delay(1000);
     }
   }
@@ -95,6 +103,18 @@ void displayMenuOption() {
     case 2:
       display.setCursor(0, 0);
       display.println("Enviar email");  // Display Menu Option 3
+      break;
+    case 3:
+      display.setCursor(0, 0);
+      display.println("Play backing track1");  // Display Menu Option 4
+      break;
+    case 4:
+      display.setCursor(0, 0);
+      display.println("Play backing track2");  // Display Menu Option 4
+      break;
+    case 5:
+      display.setCursor(0, 0);
+      display.println("Stop music");  // Display Menu Option 4
       break;
     default:
       break;
