@@ -28,6 +28,8 @@ byte colPins[4] = {7, 6, 5, 4}; // connect to the column pinouts of the keypad
 Keypad myKeypad = Keypad(makeKeymap(keys), rowPins, colPins, 4, 4);
 
 String enteredNumber = "";
+String seriesReps = "";
+int currentState = 0;
 
 const char* exerciseList[] = {
   "Chose an Exercise",
@@ -63,7 +65,7 @@ void loop() {
   char keyPressed = myKeypad.getKey();
 
   // If there is a character input, sent it to the serial port
-  if (keyPressed && isdigit(keyPressed)) {
+  if (keyPressed && isdigit(keyPressed) && currentState == 0) {
     enteredNumber += keyPressed;
     Serial.println(keyPressed);
 
@@ -75,11 +77,25 @@ void loop() {
   }else{
     if(keyPressed == 'C') {
       enteredNumber = "";
+      seriesReps = "";
       lcd.clear();
       lcd.setCursor(0, 0);
       lcd.print("Chose a Exercise");
       lcd.setCursor(0, 1);
       lcd.print(enteredNumber);
+      currentState = 0;
+    }else if(keyPressed == 'A' && currentState == 0) {
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("Series x Reps");
+      currentState = 1;
+    }else if(keyPressed && isdigit(keyPressed) || keyPressed == '*') {
+        seriesReps += keyPressed;
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("Series x Reps");
+        lcd.setCursor(0, 1);
+        lcd.print(seriesReps);
     }
   }
 }
