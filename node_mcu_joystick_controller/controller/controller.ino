@@ -15,7 +15,7 @@ unsigned long debounceDelay = 50; // Adjust this value as needed
 int joystickPinX = A0;
 int joystickThreshold = 512;
 int currentMenuOption = 0;
-int maxMenuOptions = 6;
+int maxMenuOptions = 8;
 
 void setup() {
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // Initialize with the I2C address of your display
@@ -51,6 +51,10 @@ void loop() {
         Serial.println("backtrack2");
       }else if(currentMenuOption == 5) {
         Serial.println("stopmusic");
+      }else if(currentMenuOption == 6) {
+        
+      }else if(currentMenuOption == 7) {
+        Serial.println("html-boilerplate");
       }
       delay(1000);
     }
@@ -94,27 +98,35 @@ void displayMenuOption() {
   switch (currentMenuOption) {
     case 0:
       display.setCursor(0, 0);
-      display.println("Enviar atas");  // Display Menu Option 1
+      display.println("Enviar atas");
       break;
     case 1:
       display.setCursor(0, 0);
-      display.println("Enviar pendencias");  // Display Menu Option 2
+      display.println("Enviar pendencias"); 
       break;
     case 2:
       display.setCursor(0, 0);
-      display.println("Enviar email");  // Display Menu Option 3
+      display.println("Enviar email");  
       break;
     case 3:
       display.setCursor(0, 0);
-      display.println("Play backing track1");  // Display Menu Option 4
+      display.println("Play backing track1");
       break;
     case 4:
       display.setCursor(0, 0);
-      display.println("Play backing track2");  // Display Menu Option 4
+      display.println("Play backing track2");
       break;
     case 5:
       display.setCursor(0, 0);
-      display.println("Stop music");  // Display Menu Option 4
+      display.println("Stop music"); 
+      break;
+    case 6:
+      display.setCursor(0, 0);
+      display.println("Open ChatGPT");  
+      break;
+    case 7:
+      display.setCursor(0, 0);
+      display.println("HTML Boilerplate");  
       break;
     default:
       break;

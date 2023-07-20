@@ -47,6 +47,25 @@ def open_notepad_and_type():
     # Type "Hello, World!"
     pyautogui.write('Hello, World!')
 
+    import os
+
+def create_folder(path):
+    try:
+        os.makedirs(path)
+        print(f"Folder '{path}' created successfully.")
+    except FileExistsError:
+        print(f"Folder '{path}' already exists.")
+    except OSError as e:
+        print(f"Error creating folder '{path}': {e}")
+
+def clone_git_repository(url, destination_path):
+    try:
+        print("Cloning")
+        subprocess.run(["git", "clone", url,  os.path.join(destination_folder, "html-boilerplate")], check=True)
+        print(f"Repository cloned successfully to '{destination_path}'.")
+    except subprocess.CalledProcessError as e:
+        print(f"Error cloning repository: {e}")
+
 # Main program loop
 while True:
     # Read a line from Arduino
@@ -55,9 +74,16 @@ while True:
     # Check if a key is pressed
     if line:
         # Check which key is pressed
-        if line == '1':
-            # Open CMD if key '1' is pressed
-            open_cmd()
+        if line == 'html-boilerplate':
+            documents_folder = os.path.join(os.path.expanduser("~"), "Documents")
+            generated_code_folder = os.path.join(documents_folder, "generated-code")
+            if not os.path.exists(generated_code_folder):
+                create_folder(generated_code_folder)
+
+            git_repository_url = "https://github.com/T14g/html-boilerplate.git"  
+            destination_folder = generated_code_folder
+            clone_git_repository(git_repository_url, destination_folder)
+
         elif line == '2':
            # Open Notepad and type "Hello, World!"
             open_notepad_and_type()
