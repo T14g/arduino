@@ -17,10 +17,12 @@ int joystickThreshold = 512;
 int currentMenuOption = 0;
 int maxMenuOptions = 8;
 
+const int joystickButtonPin = 0;
+
 void setup() {
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // Initialize with the I2C address of your display
   display.clearDisplay();
-
+  pinMode(joystickButtonPin, INPUT_PULLUP); // Set the joystick button pin as INPUT_PULLUP
   pinMode(buttonPin, INPUT);
   pinMode(joystickPinX, INPUT);
   Serial.begin(115200);
@@ -88,6 +90,15 @@ void loop() {
   }
   
   displayMenuOption();
+
+   // Read the state of the joystick button
+  int buttonState = digitalRead(joystickButtonPin);
+
+  // If the button is pressed (LOW), send the message to the serial monitor
+  if (buttonState == LOW) {
+    Serial.println("Hello, world!");
+    delay(500); // Add a small delay to avoid multiple messages being sent for a single button press
+  }
 }
 
 void displayMenuOption() {
