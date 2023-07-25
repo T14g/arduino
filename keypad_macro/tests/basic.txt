@@ -1,0 +1,21 @@
+import React from 'react';
+import { render, screen, fireEvent } from '@testing-library/react';
+import Button from './Button';
+
+describe('Button', () => {
+  it('renders the button with the correct label', () => {
+    const label = 'Click me';
+    render(<Button label={label} />);
+    const buttonElement = screen.getByText(label);
+    expect(buttonElement).toBeInTheDocument();
+  });
+
+  it('calls the onClick function when clicked', () => {
+    const label = 'Click me';
+    const onClickMock = jest.fn();
+    render(<Button label={label} onClick={onClickMock} />);
+    const buttonElement = screen.getByText(label);
+    fireEvent.click(buttonElement);
+    expect(onClickMock).toHaveBeenCalledTimes(1);
+  });
+});
