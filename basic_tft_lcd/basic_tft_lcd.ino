@@ -44,6 +44,7 @@ int X, Y;
 long corBot[3] = {DESLIGADO, DESLIGADO, DESLIGADO};
 const char* menu[3] = {"Scales", "Chords", "Improvisation"};
 int currentMenu = 0;
+int currentScreen = 0;
 
 TSPoint waitTouch() {
   TSPoint p;
@@ -104,10 +105,23 @@ void UpdateSelectedOption() {
     tft.print(menu[currentMenu]);
 }
 
+void DrawCronometerScreen() {
+  tft.fillScreen(0);
+  UpdateSelectedOption();
+
+  tft.setTextSize(3);
+  tft.setCursor(50,120);
+  tft.print("00:00:00");
+}
+
 void loop() {
   TSPoint p = waitTouch();
   X = p.x; Y = p.y;
-  ChoseMode();
+
+  if(currentScreen == 0) {
+    ChoseMode();
+  }
+  
   delay(300);
 }
 
@@ -125,6 +139,13 @@ void ChoseMode() {
           currentMenu++;
           UpdateSelectedOption();
         }
+      }
+  }
+
+  if(Y > 0 && Y < 60) {
+       if(X > 0 && X < 240) {
+         DrawCronometerScreen();
+         currentScreen++;
       }
   }
 }
